@@ -1,2 +1,4 @@
 # pyViginere
-Chiffrement et Déchffrement du chiffre de Viginère, Projet de mathématiques
+Projet de mathématiques, programme en Python pour chiffrer et déchiffrer avec le chiffre de Viginère
+
+Interface en HTML & CSS, python géré avec Brython
