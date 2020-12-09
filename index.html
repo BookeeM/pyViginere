@@ -1,0 +1,372 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="js/brython.js"></script>
+    <script type="text/javascript" src="js/brython_stdlib.js"></script>
+    <link href="css/viginere.css" rel="stylesheet">
+    <title>Dé/Codage Viginère</title>
+</head> 
+<header>
+    <h1 class="titre">
+        CHIFFREMENT DE VIGINERE
+    </h1>
+</header>
+<body onload="brython(1)">
+
+    <div class="box">
+        <section class="dark">
+            <label>
+                <input type="radio" id="viginere" name="choixcodage" value="viginere" class="inputRadio" checked>
+                <span class="design"></span>
+                <span class="text">Viginère</span>
+            </label>
+    
+            <label>
+                <input type="radio" id="cesar" name="choixcodage" value="cesar" class="inputRadio">
+                <span class="design"></span>
+                <span class="text">César</span>
+            </label>
+        </section>
+
+        <div id="boutons">
+            <button id="coder" class="bouton">Coder</button>
+            <button id="decoder" class="bouton">Décoder</button>
+        </div>
+
+        <div id="textArea">
+            <label for="story">Message à coder ou décoder:</label>
+            <textarea id="codage" name="story"rows="5" cols="33" placeholder="Merci d'écrire un texte pas trop court"></textarea>
+        </div>
+
+        <div id="cle" class="cle">
+         
+            Clé : <input type="text" id="clevalue" name="cle" required minlength="2" maxlength="10" size="12" placeholder="1 lettre pour césar">
+        </div>
+
+        <div id="output">
+            <p id="outputKey">Sortie:</p>
+            <label for="story">Message Codé/Décodé:</label>
+            <textarea id="decodage" name="story"rows="5" cols="33" disabled="disabled"></textarea>
+  
+        </div>
+    </div>
+</body>
+
+<script type="text/python">
+    from browser import document,alert
+    
+    import string
+    import math
+    
+    def coder(e):
+        if(document.getElementById('viginere').checked==True):
+            if(document['clevalue'].value != ''):
+                msgCodeViginere=viginere(document['codage'].value,document['clevalue'].value,False)
+                document['decodage'].value = msgCodeViginere
+            else:
+                alert("Merci de saisir une clé!")
+        else:
+            if(document['clevalue'].value != ''):
+                decallage=document['clevalue'].value
+                decallage=decallage[0]
+                indexDecallage=lettreIndex(decallage)
+                msgCodeCesar=cesar(document['codage'].value,indexDecallage)
+                document['decodage'].value = msgCodeCesar
+            else:
+                alert("Merci de saisir une clé!")
+        
+    def decoder(e):
+        if(document.getElementById('viginere').checked==True):
+            crack = crackViginere(document['codage'].value)
+            document['decodage'].value = crack[0]
+            document['outputKey'].textContent = "Sortie: "+crack[1]
+        else:
+            crack = crackCesar(document['codage'].value)
+            print(crack[1])
+            document['outputKey'].textContent = "Sortie: "+str(crack[1])+" / "+correspondreAlphabet(crack[1])
+            document['decodage'].value = crack[0]
+        
+    document['coder'].bind("click",coder)
+    document['decoder'].bind("click",decoder)
+
+
+    #Partie Concernant César
+    def crackCesar(msg):
+        decode=[]
+        decallage=avoirDecallageMsg(msg)
+        decode.append(cesar(msg,-decallage))
+        decode.append(decallage)
+        return decode
+    
+    #Partie concernant Viginère
+    def crackViginere(msg):
+        limite=10
+        tailleCleCrack=avoirLongueurCle(msg,limite)
+        decode=[]
+        #Trouver la longueur de la clé avec la méthode de l'indice de coïncidence
+        cleCrack = crackerViginereCle(msg,tailleCleCrack)
+        decode.append(viginere(msg,cleCrack,True))
+        decode.append("CLE: "+str(cleCrack))
+        return decode
+
+    def lettreIndex(char):
+        switcher = {
+            'A' : 0,
+            'B' : 1,
+            'C' : 2,
+            'D' : 3,
+            'E' : 4,
+            'F' : 5,
+            'G' : 6,
+            'H' : 7,
+            'I' : 8,
+            'J' : 9,
+            'K' : 10,
+            'L' : 11,
+            'M' : 12,
+            'N' : 13,
+            'O' : 14,
+            'P' : 15,
+            'Q' : 16,
+            'R' : 17,
+            'S' : 18,
+            'T' : 19,
+            'U' : 20,
+            'V' : 21,
+            'W' : 22,
+            'X' : 23,
+            'Y' : 24,
+            'Z' : 25,
+            'a' : 0,
+            'b' : 1,
+            'c' : 2,
+            'd' : 3,
+            'e' : 4,
+            'f' : 5,
+            'g' : 6,
+            'h' : 7,
+            'i' : 8,
+            'j' : 9,
+            'k' : 10,
+            'l' : 11,
+            'm' : 12,
+            'n' : 13,
+            'o' : 14,
+            'p' : 15,
+            'q' : 16,
+            'r' : 17,
+            's' : 18,
+            't' : 19,
+            'u' : 20,
+            'v' : 21,
+            'w' : 22,
+            'x' : 23,
+            'y' : 24,
+            'z' : 25,
+        }
+        return switcher.get(char)
+    def correspondreAlphabet(char):
+        switcher = {
+            0 : 'A',
+            1 : 'B',
+            2 : 'C',
+            3 : 'D',
+            4 : 'E',
+            5 : 'F',
+            6 : 'G',
+            7 : 'H',
+            8 : 'I',
+            9 : 'J',
+            10 : 'K',
+            11 : 'L',
+            12 : 'M',
+            13 : 'N',
+            14 : 'O',
+            15 : 'P',
+            16 : 'Q',
+            17 : 'R',
+            18 : 'S',
+            19 : 'T',
+            20 : 'U',
+            21 : 'V',
+            22 : 'W',
+            23 : 'X',
+            24 : 'Y',
+            25 : 'Z'
+        }
+        return switcher.get(char)
+    
+    
+    #Avoir quelle lettre correspond à laquelle avec un certain decallage
+    def avoirLettreDecallage(lettre,decallage):
+        diff = lettreIndex(lettre)+decallage
+        if(diff>=0 and diff<=25):
+            return correspondreAlphabet(diff)
+        elif(diff>25):
+            return correspondreAlphabet((26-diff)%25)
+        else:
+            return correspondreAlphabet(26+diff)
+    
+    
+    #Coder un message avec le decallage de cesar
+    def cesar(msg,decallage):
+        alphabet = string.ascii_uppercase #Obtenir toutes les lettres de l'alphabet en majuscule
+        msg = msg.replace(" ","")
+        msg = msg.upper() #Mettre en majuscule toutes les lettres du msg à coder
+        code = ''
+        for i in range(0,len(msg)):
+            code +=avoirLettreDecallage(msg[i],decallage)
+        return code
+    
+    #Definir les fréquences d'apparition des lettres dans un message
+    def avoirFrequences(msg):
+        frequence = [0]*26
+        for char in msg:
+            frequence[lettreIndex(char)] += 1 
+        i = 0
+        for freqi in frequence:
+            frequence[i] = freqi/len(msg)
+            i+=1
+        return frequence
+    
+    def avoirDecallageMsg(msg):
+        frequencesFR = [0.0942, 0.0102, 0.0264, 0.0339, 0.1587, 0.0095, 0.0104, 0.0077, 0.0841, 0.089, 0.000, 0.0534, 0.0324, 0.0715, 0.0514, 0.0286, 0.0106, 0.0646, 0.0790, 0.0726, 0.0624, 0.0215, 0.000, 0.0030, 0.0024, 0.0032]
+        correspondances = [0] * 26 
+        for decallage in range(0,26):
+            frequences = avoirFrequences(cesar(msg, -decallage))
+            correspondances[decallage] = 0
+            for a,b in zip(frequences,frequencesFR): #zip est là pour faire correspondre frequence[a] à frequencesFR[b]
+                #Ensuite, on rempli notre tableau de correspondance avec notre indice de decallage, et à la fin
+                #la case avec la valeur maximale correspondra au décalage utilisé dans notre chiffrement.
+                #On aura donc trouvé le décallage.
+                correspondances[decallage] += a*b
+    
+    
+        return correspondances.index(max(correspondances))
+    
+    #Admettons qu'on ai une clé de taille 6, et qu'en position en paramètre on mettre 12,
+    #la fonction va nous renvoyer la valeur "absolue", et donc, 6.
+    def ramenerA(taille,pos):
+        x = 0
+        while(pos-taille*x > taille):
+            x+=1
+        return pos-taille*x-1
+    
+    #Scinder le texte en fonction de la taille de la clé, si elle vaut deux, lesl ettres d'index pair iront dans la case 0 et impair 1, pour faire correspondre le texte à la 
+    #lettre de la clé utilisé pour chiffrer 
+    def scinderTexte(msg,tailleCle):
+        texte = [0]*tailleCle
+        for i in range(0,tailleCle):
+            texte[i] = ''
+            for indexCar in range(0,len(msg)):
+                indexAbs = ramenerA(tailleCle,indexCar)+1
+                if((indexAbs+tailleCle)%(tailleCle+i)==0):
+                    carAdd = msg[indexCar]
+                    texte[i] += carAdd
+        return texte
+    
+    def parseMsg(msg):
+        msgParsed = msg
+        msgParsed = msgParsed.lower()
+        msgParsed = msgParsed.replace("é","e")
+        msgParsed = msgParsed.replace("'","")
+        msgParsed = msgParsed.replace("à","a")
+        msgParsed = msgParsed.replace("û","u")
+        msgParsed = msgParsed.replace("â","a")
+        msgParsed = msgParsed.replace("ç","c")
+        msgParsed = msgParsed.replace("è","e")
+        msgParsed = msgParsed.replace("ç","c")
+        msgParsed = msgParsed.replace("ù","u")
+        msgParsed = msgParsed.replace(",","")
+        msgParsed = msgParsed.replace(".","")
+        msgParsed = msgParsed.replace("!","")
+        msgParsed = msgParsed.replace("?","")
+        msgParsed = msgParsed.replace("","")
+        msgParsed = msgParsed.replace(":","")
+        msgParsed = msgParsed.replace(";","")
+        msgParsed = msgParsed.replace("-","")
+        msgParsed = msgParsed.replace("(","")
+        msgParsed = msgParsed.replace(")","")
+        msgParsed = msgParsed.replace("[","")
+        msgParsed = msgParsed.replace("]","")
+        msgParsed = msgParsed.replace("}","")
+        msgParsed = msgParsed.replace("{","")
+        msgParsed = msgParsed.replace("ê","e")
+        msgParsed = msgParsed.replace(" ","")
+        msgParsed = msgParsed.upper()
+        return msgParsed
+
+    def viginere(msg,cle,decode):
+        msgCode = ''
+        msg = parseMsg(msg)
+        for i in range(0,len(msg)):
+            if(msg[i] != ' '):
+                msgNum = lettreIndex(msg[i])
+                if(i<len(cle)):
+                    cleNum = lettreIndex(cle[i])
+                else:
+                    nb = math.floor(i/len(cle))
+                    cleI = i-(nb*len(cle))
+                    cleNum = lettreIndex(cle[cleI])
+                if decode == False:
+                    lettre = correspondreAlphabet((cleNum+msgNum)%26)
+                else:
+                    lettre = correspondreAlphabet((msgNum-cleNum)%26) 
+                msgCode = msgCode + lettre
+        return msgCode
+    
+    #Permet de cracker la clé de viginère avec sa taille.
+    #Obtenir la lettre de la clé correspondant à un "sous-texte", pour cela, on cherche le décallage de cesar
+    #sur toute la partie du message ayant les lettres avec l'index de forme x.k+y
+    def crackerViginereCle(msg,tailleCle):
+        fragmentationCode=scinderTexte(msg,tailleCle)
+        cle =''
+        for i in range(0,tailleCle):
+            indexCle = avoirDecallageMsg(fragmentationCode[i])
+            cle += correspondreAlphabet(indexCle)
+        return cle
+    
+    #Retourne une liste avec le nombre d'apparition de chaque lettre
+    def lettreNb(msg):
+        lettreNbs=[0]*26
+        for char in msg:
+            lettreNbs[lettreIndex(char)]+=1
+        return lettreNbs
+    
+    #Calcule l'indice de coincidence d'un message
+    def indiceCoincidence(msg):
+        lettreNbs = lettreNb(msg)
+        somme = 0
+        for i in range(0,25):
+            somme+=lettreNbs[i]*(lettreNbs[i]-1)
+        return somme / (len(msg)*(len(msg)-1))
+    
+    #Calcule l'indice de coincidence de clés allant de taille 1 à limite 
+    def listeIndiceCoincidence(msg, limite):
+        listeIndice=[0]
+        for i in range(1, limite + 1): #Pour la taille de la clé allant de 1 à la limite:
+            #Admettons que la taille de la clé vaut deux, on effectue deux fois k pour avoir tout le texte scindé.
+            scinde = scinderTexte(msg,i)
+            somme = 0
+            for j in range(0,i):
+                somme+=indiceCoincidence(scinde[j])
+            listeIndice.append(somme)
+            listeIndice[-1] /= i #On divise par la taille de la clé la dernière valeur ajoutée afin de correspondre.
+    
+    
+        return listeIndice
+    
+    #Récupérer la longueur de la clé de viginère
+    def avoirLongueurCle(msg, limite):
+        listeIndice = listeIndiceCoincidence(msg, limite)
+        p=[limite+1]
+        for i in range(0,limite):
+            if listeIndice[i] > 0.068: #Si l'indice de coïncidence est supérieur, il est très probable que ça corresponde au français
+                p.append(i) #On ajoute la valeur de i, qui peut être la longueur de la clé à p
+        return min(p) #On récupère la valeur minimale de la clé qu'on a obtenue.  
+</script>
+
+
+</html>
