@@ -72,7 +72,7 @@
         else:
             if(document['clevalue'].value != ''):
                 decallage=document['clevalue'].value
-                decallage=decallage[0]
+                decallage=decallage[0] 
                 indexDecallage=lettreIndex(decallage)
                 msgCodeCesar=cesar(document['codage'].value,indexDecallage)
                 document['decodage'].value = msgCodeCesar
@@ -273,6 +273,16 @@
         msgParsed = msg
         msgParsed = msgParsed.lower()
         msgParsed = msgParsed.replace("é","e")
+		msgParsed = msgParsed.replace("0","")
+		msgParsed = msgParsed.replace("1","")
+		msgParsed = msgParsed.replace("2","")
+		msgParsed = msgParsed.replace("3","")
+		msgParsed = msgParsed.replace("4","")
+		msgParsed = msgParsed.replace("5","")
+		msgParsed = msgParsed.replace("6","")
+		msgParsed = msgParsed.replace("7","")
+		msgParsed = msgParsed.replace("8","")
+		msgParsed = msgParsed.replace("9","")
         msgParsed = msgParsed.replace("'","")
         msgParsed = msgParsed.replace("à","a")
         msgParsed = msgParsed.replace("û","u")
